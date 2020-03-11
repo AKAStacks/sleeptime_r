@@ -4,7 +4,7 @@ extern crate gio;
 use gtk::prelude::*;
 use gio::prelude::*;
 
-use gtk::{Application, ApplicationWindow, Button, Dialog};
+use gtk::{Application, ApplicationWindow, Button, Entry, Box};
 
 fn main() {
     let application = Application::new(  // Prototype gtk's Application type
@@ -17,12 +17,20 @@ fn main() {
         window.set_title("First GTK+ Program");
         window.set_default_size(350,70);
 
-        let button = Button::new_with_label("Click me!");
-        button.connect_clicked(|_| {
-            println!("Clicked!");
-        });
-        window.add(&button);
+        let vbox = Box::new(gtk::Orientation::Vertical, 2);
 
+        let entry = Entry::new();
+        let entry_clone = entry.clone();
+
+        let button = Button::new_with_label("Click me!");
+        button.connect_clicked(move |_| {
+            let entry_val = entry_clone.get_buffer().get_text();
+            println!("{}", entry_val);
+        });
+
+        vbox.add(&button);
+        vbox.add(&entry);
+        window.add(&vbox);
         window.show_all();
     });
 
