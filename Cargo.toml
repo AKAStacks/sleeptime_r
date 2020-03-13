@@ -1,19 +1,25 @@
 [package]
-name = "sleeptimeR"
+name = "sleeptime_r"
 version = "0.1.0"
-authors = ["stacks"]
+authors = ["AKAStacks"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 shrinkwraprs = "0.3.0"
+system_shutdown = "3.0.0"
 
 [dependencies.gtk]
-version = "0.8.0"
+git = "https://github.com/gtk-rs/gtk"
 features = ["v3_16"]
 
 [dependencies.gio]
-version = ""
+git = "https://github.com/gtk-rs/gio"
 features = ["v2_44"]
+
+[dependencies.glib]
+git = "https://github.com/gtk-rs/glib"
+
+
 
