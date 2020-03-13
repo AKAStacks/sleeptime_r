@@ -3,13 +3,14 @@ extern crate gio;
 
 use gtk::prelude::*;
 use gio::prelude::*;
+use shrinkwraprs::*;
 
 use std::{thread, time};
 use gtk::{Application, Button, SpinButton, Dialog};
 
 /* My wife and I use shutdown +120 a lot to delay shutdown and let shows run while we try to sleep.
    I want to learn some basic Rust, so I'm trying to make a super simple application to provide a "Still There?"
-   dialog to opt out of the shutdown. For whatever reason, after I set the timer, my show_input_dialog()
+   dialog to opt out of the shutdown. For whatever reason, after I set the timer, my show_sleep_time_dialog()
    dialog doesn't disappear when I destroy it @60. I know Python or even bash would be better suited
    for something like this, sorry. */
 
@@ -22,11 +23,13 @@ fn main() {
     application.connect_activate(|app| {
         app.hold();
         // returns response type and a SpinButton value
-        let response: (gtk::ResponseType, f64) = show_input_dialog();
+        let response: (gtk::ResponseType, f64) = show_sleep_time_dialog();
+        let responsetype: gtk::ResponseType = response.0;
+        let sleeptime: f64 = response.1;
 
-        if response.0 == gtk::ResponseType::Accept {
-            println!("Start timer for {} minutes.", response.1.to_string());
-            sleep_for(response.1);
+        if responsetype == gtk::ResponseType::Accept {
+            println!("Start timer for {} minutes.", &sleeptime.to_string());
+            sleep_for(&sleeptime);
             show_fallback_dialog();
         } else {
             println!("Cancel!");
@@ -37,26 +40,49 @@ fn main() {
     application.run(&[]);
 }
 
-fn show_input_dialog() -> (gtk::ResponseType, f64) {
-    let dialog = Dialog::new();
+#[derive(Shrinkwrap)]
+struct SleepTimeDialog {
+    spinbutton: SpinButton,
+    #[shrinkwrap(main_field)] dialog: Dialog,
+}
 
-    let spinbutton = SpinButton::new_with_range(
-        0.0,    // min
-        480.0,  // max
-        10.0);  // step
+impl SleepTimeDialog {
+    fn new(title: &str, min: f64, max: f64, step: f64) -> SleepTimeDialog {
+        let dialog = Dialog::new();
+        let spinbutton = SpinButton::new_with_range(
+            min,
+            max,
+            step
+        );
 
-    let settimerbutton = Button::new_with_mnemonic(
-        "_Set Timer");
+        let settimerbutton = Button::new_with_mnemonic("_Set Timer");
+        settimerbutton.connect_activate(|me| {
+            me.set_label("Timer Set!");
+        });
+        let cancelbutton = Button::new_with_mnemonic("_Cancel");
 
-    let cancelbutton = Button::new_with_mnemonic(
-        "_Cancel");
+        dialog.set_title(title);
+        dialog.get_content_area()
+            .add(&spinbutton);
+        dialog.add_action_widget(&settimerbutton, gtk::ResponseType::Accept);
+        dialog.add_action_widget(&cancelbutton, gtk::ResponseType::Cancel);
+        dialog.show_all();
+        SleepTimeDialog { dialog, spinbutton }
+    }
 
-    dialog.set_title("Set sleep timer?");
-    dialog.get_content_area().add(&spinbutton);
-    dialog.add_action_widget(&settimerbutton, gtk::ResponseType::Accept);
-    dialog.add_action_widget(&cancelbutton, gtk::ResponseType::Cancel);
-    dialog.show_all();
-    let response = (dialog.run(), spinbutton.get_value());
+    fn get_value(&self) -> f64 {
+        self.spinbutton.get_value()
+    }
+}
+
+fn show_sleep_time_dialog() -> (gtk::ResponseType, f64) {
+    let dialog = SleepTimeDialog::new(
+        "Set sleep timer?",
+        0.0,
+        480.0,
+        5.0,
+    );
+    let response = (dialog.run(), dialog.get_value());
     dialog.destroy();
     return response;
 }
@@ -71,15 +97,16 @@ fn show_fallback_dialog() -> gtk::ResponseType {
     dialog.add_action_widget(&dialogbutton, gtk::ResponseType::Yes);
     dialog.show_all();
 
-    return dialog.run();
+    dialog.run()
 }
 
-fn sleep_for(minutes: f64) {
+fn sleep_for(minutes: &f64) {
     let secondsconv = (minutes * 60.0) as i64;
-    let onesecond = time::Duration::new(1,0);
-    println!("Sleeping for {} seconds:", secondsconv.to_string());
+    let sleeptime = time::Duration::new(1,0);
+    println!("Sleeping for {} seconds:", &secondsconv.to_string());
     for second in 0..secondsconv {
+        gtk::main_iteration_do(false);
         println!("{}", second.to_string());
-        thread::sleep(onesecond);
+        thread::sleep(sleeptime);
     }
 }
