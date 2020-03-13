@@ -24,8 +24,8 @@ fn main() {
         app.hold();
         // returns response type and a SpinButton value
         let response: (gtk::ResponseType, f64) = show_sleep_time_dialog();
-        let responsetype: gtk::ResponseType = response.0;
-        let sleeptime: f64 = response.1;
+        let responsetype: gtk::ResponseType = response.0.clone();
+        let sleeptime: f64 = response.1.clone();
 
         if responsetype == gtk::ResponseType::Accept {
             println!("Start timer for {} minutes.", &sleeptime.to_string());
@@ -54,17 +54,15 @@ impl SleepTimeDialog {
             max,
             step
         );
-
-        let settimerbutton = Button::new_with_mnemonic("_Set Timer");
-        settimerbutton.connect_activate(|me| {
-            me.set_label("Timer Set!");
-        });
         let cancelbutton = Button::new_with_mnemonic("_Cancel");
+        let cancelbutton_clone = cancelbutton.clone();
+
+        spinbutton.connect_activate(move |_| {
+            cancelbutton_clone.set_label("Timer Set!");
+        });
 
         dialog.set_title(title);
-        dialog.get_content_area()
-            .add(&spinbutton);
-        dialog.add_action_widget(&settimerbutton, gtk::ResponseType::Accept);
+        dialog.add_action_widget(&spinbutton, gtk::ResponseType::Accept);
         dialog.add_action_widget(&cancelbutton, gtk::ResponseType::Cancel);
         dialog.show_all();
         SleepTimeDialog { dialog, spinbutton }
@@ -72,6 +70,13 @@ impl SleepTimeDialog {
 
     fn get_value(&self) -> f64 {
         self.spinbutton.get_value()
+    }
+
+    fn run(&self) -> (gtk::ResponseType, f64) {
+        let responsetype: gtk::ResponseType = self.dialog.run();
+        let value = self.get_value();
+        self.destroy();
+        (responsetype, value)
     }
 }
 
@@ -82,8 +87,8 @@ fn show_sleep_time_dialog() -> (gtk::ResponseType, f64) {
         480.0,
         5.0,
     );
-    let response = (dialog.run(), dialog.get_value());
-    dialog.destroy();
+    let response = dialog.run();
+
     return response;
 }
 
@@ -101,12 +106,15 @@ fn show_fallback_dialog() -> gtk::ResponseType {
 }
 
 fn sleep_for(minutes: &f64) {
-    let secondsconv = (minutes * 60.0) as i64;
-    let sleeptime = time::Duration::new(1,0);
+    let secondsconv = (minutes * 60.0) as u64;
+    let sleeptime = time::Duration::new(secondsconv,0);
     println!("Sleeping for {} seconds:", &secondsconv.to_string());
-    for second in 0..secondsconv {
-        gtk::main_iteration_do(false);
-        println!("{}", second.to_string());
-        thread::sleep(sleeptime);
+    loop {
+        if gtk::events_pending() {
+            gtk::main_iteration_do(false);
+        } else {
+            thread::sleep(sleeptime);
+            break;
+        }
     }
 }
