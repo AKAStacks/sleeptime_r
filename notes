@@ -1,8 +1,0 @@
-Dialog asks how long to wait = timerlength
-       Entry on Dialog
-       takes h,m,s; assumes m
-rust sleeps timerlength
-     use gio.application.hold() so window can be closed & keep app alive
-Dialog asks confirm shutdown?
-       rust sleeps 10s (countdown);
-       after 10s, shutdown
