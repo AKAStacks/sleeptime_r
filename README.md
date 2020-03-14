@@ -21,7 +21,8 @@ FLAGS:
 
 OPTIONS:
     -d, --default <INTEGER>       Sets initial value of timer (in minutes). Default: 0, Max: 480
-    -s, --stillthere <INTEGER>    Sets timeout of 'still there' window (in seconds). Default: 10, Max: 255```
+    -s, --stillthere <INTEGER>    Sets timeout of 'still there' window (in seconds). Default: 10, Max: 255
+```
 
 Please note that 0 is a valid value for the delay. This allows for testing of the above options, or if you just want to shutdown after the default 10 seconds.
 
