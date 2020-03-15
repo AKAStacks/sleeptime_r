@@ -1,2 +1,6 @@
 /target
 Cargo.lock
+/pkg
+*.pkg.tar.xz
+*.deb
+/src/sleeptime_r*

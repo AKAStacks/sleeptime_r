@@ -8,7 +8,36 @@ It's a bit like using ```bash shutdown +m``` except the +m value is taken via GU
 
 ## Installation
 
-TBD: Need PKGBUILD and .deb
+### From source:
+```bash
+# Clone the repository
+git clone https://github.com/AKAStacks/sleeptime_r.git
+
+# cd into the directory
+cd sleeptime_r
+
+# Use cargo to build the project
+cargo build --release
+
+# cd into the built directory
+cd ./target/release
+
+# Copy the binary to /usr/bin, or another directory in your $PATH
+sudo cp sleeptime_r /usr/bin/
+
+# Clean up
+cd ../../..
+rm -r ./sleeptime_r
+```
+
+### Within Arch, makepkg & pacman:
+```bash
+wget https://www.github.com/AKAStacks/sleeptime_r/PKGBUILD
+makepkg
+sudo pacman -U ./sleeptime_r-0.1.0-1-x86_64.pkg.tar.xz
+```
+
+TODO: Get the .deb hosted/available somehow.
 
 ## Usage
 

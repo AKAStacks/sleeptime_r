@@ -3,6 +3,13 @@ name = "sleeptime_r"
 version = "0.1.0"
 authors = ["Dennis Zarger (github: AKAStacks)"]
 edition = "2018"
+description = "Simple GTK+ application for scheduling a system shutdown."
+license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
+
+[package.metadata.arch]
+arch = ["x86_64"]
 
 [dependencies]
 shrinkwraprs = "0.3.0"
@@ -19,6 +26,3 @@ features = ["v2_44"]
 
 [dependencies.glib]
 git = "https://github.com/gtk-rs/glib"
-
-
-
